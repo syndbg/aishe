@@ -96,6 +96,8 @@ async def health_check():
         test_client.list_models()
     except Exception as e:
         message = f"Ollama not accessible: {str(e)}"
+    else:
+        ollama_accessible = True
 
     return HealthResponse(
         status="healthy" if ollama_accessible else "degraded",
