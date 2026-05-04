@@ -1,7 +1,7 @@
 ---
 author: Redis Team Sofia
 title: Redis AI Workshop
-date: 19 Feb 2026
+date: 14 May 2026
 ---
 
 ## What are we going to do today?
@@ -188,6 +188,14 @@ we encourage exploration, asking questions, pair programming.
 - introducing LangCache
 - ./workshop/session-3/README.md
 - show me the code
+
+---
+
+### Stretch goal / homework - use AI to implement stretch tasks
+
+- Inspect READMEs for sessions 1 and 2
+- Implement stretch tasks using agentic AI
+- Any LLM will work
 
 ---
 

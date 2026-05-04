@@ -240,3 +240,12 @@ threshold = 0.90  # from 0.80
 - Limit cache size
 - Use local embedding models
 - Implement cache partitioning
+
+---
+
+## STRETCH TASK: use AI to implement stretch tasks
+
+Use your favorite AI agent to implement the following tasks:
+
+- [STRETCH TASK 1](/workshop/session-1/README.md#stretch-task-modern-aishe-architecture)
+- [STRETCH TASK 2](/workshop/session-2/README.md#stretch-task-implement-semantic-caching)

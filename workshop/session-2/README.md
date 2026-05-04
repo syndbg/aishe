@@ -275,3 +275,140 @@ docker exec -it aishe-redis redis-cli --scan --pattern "aishe:question:*" | xarg
 docker exec -it aishe-redis redis-cli FLUSHDB
 ```
 
+---
+
+## STRETCH TASK: implement semantic caching
+
+AISHE + regular Redis cache = blazingly fast *exact* prompt text lookups
+
+AISHE + semantic Redis cache = still-extremely-fast *meaning-based* lookups
+
+To implement semantic caching you'll need to:
+
+1) Vectorize a prompt
+   > Text is split into tokens. An embedding model transforms
+   > these tokens into a list of numbers (an n-dimensional vector).
+
+2) Perform similarity search
+   > Compute how similar this prompt's meaning is to previous
+   > prompts in a vector database.
+
+3) If a similar one exists, reuse cached answer
+
+4) Otherwise cache this vector embedding and its answer
+
+```
+         ┌─────────────┐
+         │    User     │
+         │  question   │
+         └──────┬──────┘
+                │
+                ▼
+      ┌───────────────────┐
+      │   Embedding       │
+      │     model         │
+      │ (tokens → vector) │
+      └─────────┬─────────┘
+                │
+                │  n-dim vector
+                ▼
+    ┌───────────────────────┐
+    │   Redis vector DB     │
+    │  similarity search    │
+    │  over past prompts    │
+    └───────────┬───────────┘
+                │
+     ┌──────────┴──────────┐
+     │                     │
+  similar hit          no match
+  (score ≥ threshold)  (cache miss)
+     │                     │
+     ▼                     ▼
+┌─────────────┐     ┌─────────────┐
+│   Cached    │     │    AISHE    │
+│   answer    │     │   server    │
+│  (reused)   │     │ (full RAG)  │
+└──────┬──────┘     └──────┬──────┘
+       │                   │
+       │                   │  answer
+       │                   ▼
+       │            ┌─────────────┐
+       │            │ Store vector│
+       │            │  + answer   │
+       │            │  in Redis   │
+       │            └──────┬──────┘
+       │                   │
+       └─────────┬─────────┘
+                 │
+                 ▼
+          ┌─────────────┐
+          │    User     │
+          └─────────────┘
+```
+
+### Before proceeding
+
+You need a working session 2 client before proceeding. Complete the regular task
+first, then revisit this one.
+
+This task involves modifying your existing AISHE client. No server changes are necessary.
+
+For a more comprehensive overview of semantic caching, check out
+[this article](https://wso2.com/library/blogs/what-is-semantic-caching/).
+
+Again, you are free to use AI agents for this task.
+
+### How to use AI to implement this task
+
+Sometimes, you're barely familiar with the subject. You may not know how to
+store embeddings in Redis or compute semantic similarity.
+
+But you know what a working solution looks like. You have a well-defined task
+and don't know the implementation details.
+
+In these cases, you can *reverse the development process* (compared to stretch task 1):
+- We let AI implement our task with as many requirements as we know.
+- Later we study and refine the implementation piece-by-piece.
+
+1. Create a **detailed prompt** and have your AI agent implement the task outright:
+
+> I want you to implement semantic caching with Redis inside my Python client in
+> workshop/session-2/python/main.py.
+>
+> To do this you'll need to:
+> 1) Vectorize a prompt: text is split into tokens. An embedding model transforms
+>                        these tokens into a list of numbers (an n-dimensional vector)
+> 2) Perform similarity search: compute how similar this prompt's meaning is to
+>                               previous prompts in a vector database
+> 3) If a similar one exists, reuse cached answer
+> 4) Otherwise cache this vector embedding and its answer
+>
+> Use the LangCache model https://huggingface.co/redis/langcache-embed-v2. Show me
+> the simplest instructions to install it and set it up manually.
+>
+> Use my existing plain Redis OSS to store vector embeddings in whatever way you deem best.
+>
+> Make all code changes only in my main.py file. Optimize the code to be easy to read
+> for a software engineering student and adopt my personal style of coding.
+
+2. **Assert** it's working:
+
+```bash
+./your-cli "What is Redis?"
+```
+
+and
+
+```bash
+./your-cli "Explain Redis"
+```
+
+Should hit the cache and return the same response.
+
+3. Inspect, **study**, and question the implementation:
+
+> Hey, I'm curious: how does this code determine if two prompts are similar?
+
+4. **Refine** implementation chunk by chunk:
+
+> What similarity threshold would I need to set to match looser prompts like "Where is Redis used?"
